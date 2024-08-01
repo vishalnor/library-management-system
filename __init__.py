@@ -23,7 +23,7 @@ app.config["SECRET_KEY"] = secret_key
 
 # Database configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+mysqlconnector://avnadmin:AVNS_TYZK1N-Eu7TbZ9LsGPi@mysql-35c3371f-bhavinnor13-9cbc.l.aivencloud.com:17109/defaultdb"
+    os.getenv("DB_URL")
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

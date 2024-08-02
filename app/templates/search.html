@@ -1,0 +1,215 @@
+{% extends "base.html" %} {% block title %}Search Books - Athenaeum Library
+System{% endblock %} {% block head %} {{ super() }} {% endblock %} {% block
+content %}
+
+<style>
+  body {
+    font-family: "Open Sans", sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .search-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .search-header h1 {
+    font-family: "Merriweather", serif;
+    color: #2c3e50;
+  }
+
+  .search-form {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .search-input {
+    width: 60%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+  }
+
+  .search-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .search-button:hover {
+    background-color: #2980b9;
+  }
+
+  .search-results {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  .results-header {
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .book-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+
+  .book-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .book-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .book-info {
+    padding: 15px;
+  }
+
+  .book-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  .book-authors {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+  }
+
+  .book-description {
+    font-size: 0.9em;
+    margin-bottom: 15px;
+  }
+
+  .add-to-cart {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .add-to-cart:hover {
+    background-color: #27ae60;
+  }
+
+  .back-to-cart {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .back-to-cart:hover {
+    background-color: #2980b9;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #7f8c8d;
+  }
+</style>
+
+<div id="loading-overlay" style="display: none">
+  <div class="loader"></div>
+</div>
+<div class="search-container">
+  <header class="search-header">
+    <h1>Explore Our Library</h1>
+  </header>
+
+  <form method="POST" action="/search" class="search-form">
+    <input
+      type="text"
+      name="search_term"
+      placeholder="Enter book title or author"
+      required
+      class="search-input"
+    />
+    <button type="submit" class="search-button">Search</button>
+  </form>
+
+  <div class="search-results">
+    <div class="results-header">
+      <h2>Search Results</h2>
+    </div>
+    {% if books %}
+    <div class="book-grid">
+      {% for book in books %}
+      <div class="book-card">
+        {% if book.volumeInfo.imageLinks and
+        book.volumeInfo.imageLinks.thumbnail %}
+        <img
+          src="{{ book.volumeInfo.imageLinks.thumbnail }}"
+          alt="{{ book.volumeInfo.title }}"
+        />
+        {% endif %}
+        <div class="book-info">
+          <div class="book-title">{{ book.volumeInfo.title }}</div>
+          <div class="book-authors">
+            {{ book.volumeInfo.authors | join(', ') }}
+          </div>
+          <div class="book-description">
+            {{ book.volumeInfo.description | truncate(100) }}
+          </div>
+          <a
+            href="{{ url_for('add_to_cart', book_id=book.id) }}"
+            class="add-to-cart"
+            style=""
+            >Add to Cart</a
+          >
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-results">No books found for the given search term.</p>
+    {% endif %}
+  </div>
+
+  <a href="/cart" class="back-to-cart">Back to Cart</a>
+</div>
+{% endblock %}

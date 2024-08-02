@@ -22,9 +22,10 @@ from app import app, db, logger
 from app.models import User, Book, CartItem
 from app.controller import signin_controller
 from app.controller import signup_controller
+from app import login_manager
 
 home = Blueprint("main", __name__)
-
+login_manager.login_view = "main.signin"
 
 # Routes
 @home.route("/signin", methods=["GET", "POST"])
@@ -54,6 +55,7 @@ def signup():
 
 
 @home.route("/search", methods=["GET", "POST"])
+@login_required
 def search():
     books = []
     if request.method == "POST":

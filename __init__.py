@@ -19,12 +19,11 @@ app = Flask(__name__)
 
 # Secret key generation
 secret_key = os.getenv("SECRET_KEY")
+db_url = os.getenv("DB_URL")
 app.config["SECRET_KEY"] = secret_key
 
 # Database configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+mysqlconnector://avnadmin:AVNS_TYZK1N-Eu7TbZ9LsGPi@mysql-35c3371f-bhavinnor13-9cbc.l.aivencloud.com:17109/defaultdb"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = (db_url)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)

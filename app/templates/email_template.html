@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your E-Books Are Ready</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #1a73e8;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: normal;
+        }
+        .content {
+            padding: 30px;
+        }
+        .book-links {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .book-links a {
+            color: #1a73e8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .book-links a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your E-Books Are Ready</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ student_name }},</p>
+            <p>Thank you for using our library service. Your requested e-books are now available. Please find the links to access them below:</p>
+            <div class="book-links">
+                {% for link in links %}
+                    <a href="{{ link.url }}" target="_blank">{{ link.title }}</a>
+                {% endfor %}
+            </div>
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+            <p>Happy reading!</p>
+            <p>Best regards,<br>Norens Library Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Norens Library. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,7 +1,8 @@
-from flask import flash, redirect, render_template_string
+from flask import flash, redirect, render_template_string, render_template
 from flask_login import login_user
-from app import db, logger
+from app import db, logger, mail
 from app.models import User
+from flask_mail import Message
 
 
 def signin_controller(email, password):
@@ -22,16 +23,38 @@ def signin_controller(email, password):
 
 def signup_controller(username, email, password):
     # Check if the email is already registered
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
+
+    existing_username = User.query.filter_by(name=username).first()
+    existing_email = User.query.filter_by(email=email).first()
+    if existing_email:
         flash("Email address already exists. Please use a different email.", "danger")
         return redirect("/signup")
-
-    # Create new user
-    new_user = User(username=username, email=email)
-    new_user.set_password(password)
-    db.session.add(new_user)
-    db.session.commit()
+    elif existing_username:
+        flash("username already exists. Please use a different email.", "danger")
+        return redirect("/signup")
+    else:
+        # Create new user
+        new_user = User(username=username, email=email)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
 
     flash("Account created successfully. Please log in.", "success")
     return redirect("/signin")
+
+def send_email(student_name, email, book_links):
+    msg = Message(
+            "Your E-Books Are Ready - Norens Library",
+            recipients=[email],  # Use the collected email address
+        )
+
+    msg.body = "Thank you for the purchased please find below all the links"
+    msg.html = render_template(
+        "email_template.html", student_name=student_name, links=book_links
+    )
+
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        return f"Failed to send email: {e}"

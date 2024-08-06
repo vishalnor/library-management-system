@@ -11,6 +11,7 @@ from flask import (
     session,
 )
 import requests
+from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     login_required,
@@ -18,14 +19,16 @@ from flask_login import (
 )
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import app, db, logger
-from app.models import User, Book, CartItem
+from app import app, db, logger, mail
+from app.models import User, Book, CartItem, Checkout
 from app.controller import signin_controller
 from app.controller import signup_controller
+from app.controller import send_email
 from app import login_manager
 
 home = Blueprint("main", __name__)
 login_manager.login_view = "main.signin"
+
 
 # Routes
 @home.route("/signin", methods=["GET", "POST"])
@@ -138,6 +141,48 @@ def cart():
 
     return render_template("cart.html", cart_item=found_books)
 
+
+@home.route("/checkout", methods=["GET", "POST"])
+@login_required
+def checkout():
+    if request.method == "POST":
+        student_name = request.form.get("student_name")
+        email = request.form.get("email")
+        print("EMAIL RECEIVED", email)
+        
+        # Validate the email address
+        if not email or "@" not in email or "." not in email:
+            flash("Invalid email address", "error")
+            return redirect(url_for('main.checkout'))
+        
+        # Save checkout information to the database
+        checkout = Checkout(student_name=student_name, email=email)
+        db.session.add(checkout)
+        db.session.commit()
+        
+        # Retrieve user's cart items and corresponding book links
+        get_user_cart = CartItem.query.filter_by(user_id=current_user.id).all()
+        book_links = []
+        for cart in get_user_cart:
+            book = Book.query.filter_by(id=cart.book_id).first()
+            book_links.append({
+                "title": book.title,  # Assuming the Book model has a title attribute
+                "url": f"https://books.google.com/books?id={book.google_id}"
+            })
+        
+        # Send email with the book links
+        send_email(student_name, email, book_links)
+         # Flash a success message and redirect
+        flash("Checkout completed and email sent successfully!", "success")
+        return redirect(url_for('main.checkout'))
+    
+    # Render the checkout page for GET request
+    return render_template("checkout.html")
+
+@home.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
 
 @home.route("/", methods=["GET", "POST"])
 @login_required

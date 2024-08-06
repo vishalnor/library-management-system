@@ -37,6 +37,14 @@ class CartItem(db.Model):
     user = db.relationship("User")
 
 
+class Checkout(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    student_name = db.Column(db.String(200), nullable=False)
+    
+
+
+
 # Callback to load user object from ID
 @login_manager.user_loader
 def load_user(user_id):

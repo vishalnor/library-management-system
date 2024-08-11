@@ -9,6 +9,7 @@ from flask import (
     json,
     url_for,
     session,
+    jsonify,
 )
 import requests
 from flask_mail import Mail, Message
@@ -48,13 +49,25 @@ def signin():
 
 @home.route("/signup", methods=["GET", "POST"])
 def signup():
+    urls = [
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Molly",
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=George",
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Bubba",
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Sassy",
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Mittens",
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Callie",
+    ]
+
+    print(urls)
     if request.method == "POST":
         username = request.form.get("name")
         email = request.form.get("email")
         password = request.form.get("password")
-        return signup_controller(username, email, password)
+        avatar_url = request.form.get("avatar_url")
 
-    return render_template("signup.html")
+        signup_controller(username, email, password, avatar_url)
+
+    return render_template("signup.html", urls=urls)
 
 
 @home.route("/search", methods=["GET", "POST"])
@@ -149,40 +162,52 @@ def checkout():
         student_name = request.form.get("student_name")
         email = request.form.get("email")
         print("EMAIL RECEIVED", email)
-        
+
         # Validate the email address
         if not email or "@" not in email or "." not in email:
             flash("Invalid email address", "error")
-            return redirect(url_for('main.checkout'))
-        
+            return redirect(url_for("main.checkout"))
+
         # Save checkout information to the database
         checkout = Checkout(student_name=student_name, email=email)
         db.session.add(checkout)
         db.session.commit()
-        
+
         # Retrieve user's cart items and corresponding book links
         get_user_cart = CartItem.query.filter_by(user_id=current_user.id).all()
         book_links = []
         for cart in get_user_cart:
             book = Book.query.filter_by(id=cart.book_id).first()
-            book_links.append({
-                "title": book.title,  # Assuming the Book model has a title attribute
-                "url": f"https://books.google.com/books?id={book.google_id}"
-            })
-        
+            book_links.append(
+                {
+                    "title": book.title,  # Assuming the Book model has a title attribute
+                    "url": f"https://books.google.com/books?id={book.google_id}",
+                }
+            )
+
         # Send email with the book links
         send_email(student_name, email, book_links)
-         # Flash a success message and redirect
+        # Flash a success message and redirect
         flash("Checkout completed and email sent successfully!", "success")
-        return redirect(url_for('main.checkout'))
-    
+        return redirect(url_for("main.checkout"))
+
     # Render the checkout page for GET request
     return render_template("checkout.html")
 
-@home.route('/profile')
+
+@home.route("/profile")
 @login_required
 def profile():
-    return render_template('profile.html')
+    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    book_list = []
+    print(book_list)
+    count = len(cart_items)
+    print(count)
+    for books in cart_items:
+        book = Book.query.filter_by(id=books.book_id).first()
+        book_list.append(book)
+    return render_template("profile.html", user=current_user, items=book_list)
+
 
 @home.route("/", methods=["GET", "POST"])
 @login_required

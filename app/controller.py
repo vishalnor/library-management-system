@@ -21,20 +21,20 @@ def signin_controller(email, password):
         return render_template_string("<b>Something went wrong!<b>")
 
 
-def signup_controller(username, email, password):
+def signup_controller(username, email, password, avatar_url):
     # Check if the email is already registered
 
-    existing_username = User.query.filter_by(name=username).first()
+    existing_username = User.query.filter_by(username=username).first()
     existing_email = User.query.filter_by(email=email).first()
     if existing_email:
         flash("Email address already exists. Please use a different email.", "danger")
         return redirect("/signup")
     elif existing_username:
-        flash("username already exists. Please use a different email.", "danger")
+        flash("Username already exists. Please use a different name.", "danger")
         return redirect("/signup")
     else:
         # Create new user
-        new_user = User(username=username, email=email)
+        new_user = User(username=username, email=email, avatar=avatar_url)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
@@ -42,11 +42,12 @@ def signup_controller(username, email, password):
     flash("Account created successfully. Please log in.", "success")
     return redirect("/signin")
 
+
 def send_email(student_name, email, book_links):
     msg = Message(
-            "Your E-Books Are Ready - Norens Library",
-            recipients=[email],  # Use the collected email address
-        )
+        "Your E-Books Are Ready - Norens Library",
+        recipients=[email],  # Use the collected email address
+    )
 
     msg.body = "Thank you for the purchased please find below all the links"
     msg.html = render_template(

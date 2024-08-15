@@ -530,7 +530,7 @@
               />
               {% endfor %}
             </div>
-            <button onclick="confirmAvatarSelection()" class="confirm-btn">
+            <button type="button" onclick="confirmAvatarSelection()" class="confirm-btn">
               <i class="fas fa-check"></i> Confirm Selection
             </button>
           </div>
@@ -590,13 +590,10 @@
 
   function selectAvatar(url) {
     selectedAvatar = url;
-
-    // Clear previous selections
-    document.querySelectorAll(".avatar-option").forEach((img) => {
-      img.classList.remove("selected");
+    const avatarOptions = document.querySelectorAll(".avatar-option");
+    avatarOptions.forEach((option) => {
+      option.classList.remove("selected");
     });
-
-    // Highlight the selected avatar
     event.target.classList.add("selected");
   }
 
@@ -608,11 +605,4 @@
       alert("Please select an avatar before confirming.");
     }
   }
-
-  document.getElementById("authForm").onsubmit = function (event) {
-    if (!document.getElementById("avatar_url").value) {
-      event.preventDefault();
-      alert("Please select an avatar before signing up.");
-    }
-  };
 </script>

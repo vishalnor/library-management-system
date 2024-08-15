@@ -49,22 +49,23 @@ def signin():
 
 @home.route("/signup", methods=["GET", "POST"])
 def signup():
+    
     urls = [
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Molly",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=George",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Bubba",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Sassy",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Mittens",
-        "https://api.dicebear.com/9.x/adventurer/svg?seed=Callie",
-    ]
-
-    print(urls)
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Callie"
+        ]
+    
+    print("URLS", urls)
     if request.method == "POST":
         username = request.form.get("name")
         email = request.form.get("email")
         password = request.form.get("password")
         avatar_url = request.form.get("avatar_url")
-
+        
         signup_controller(username, email, password, avatar_url)
 
     return render_template("signup.html", urls=urls)

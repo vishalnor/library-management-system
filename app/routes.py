@@ -83,58 +83,60 @@ def search():
         books = response.json().get("items", [])
     return render_template("search.html", books=books)
 
-
-@app.route("/add_to_cart/<book_id>", methods=["GET", "POST"])
+@app.route("/add_to_cart/<book_id>", methods=["POST", "GET"])
 @login_required
 def add_to_cart(book_id):
     try:
+        # Fetch book details from Google Books API
         response = requests.get(
             f"https://www.googleapis.com/books/v1/volumes/{book_id}?key={os.getenv('GOOGLE_BOOKS_API_KEY')}"
         )
         response.raise_for_status()  # This will raise an HTTPError for bad responses
-        book = response.json()
+        book_data = response.json()
 
-        volume_info = book.get("volumeInfo", {})
-        id = book_id
+        volume_info = book_data.get("volumeInfo", {})
         title = volume_info.get("title", "No Title")
         authors = ", ".join(volume_info.get("authors", ["No Authors"]))
         description = volume_info.get("description", "No Description")
         image = volume_info.get("imageLinks", {}).get("thumbnail")
         print("Image", image)
-        # Save book information to the database
-        new_book = Book(
-            google_id=id,
-            title=title,
-            authors=authors,
-            description=description,
-            image=image,
-        )
-        db.session.add(new_book)
-        db.session.commit()
-        print("new book:", new_book)
-        # Check if the book is already in the cart
-        book = Book.query.filter_by(google_id=id).first()
 
-        if book:
-            # Check if the book is already in the user's cart
-            existing_cart_item = CartItem.query.filter_by(
-                user_id=current_user.id, book_id=book.id
-            ).first()
+        # Check if the book already exists in the database
+        book = Book.query.filter_by(google_id=book_id).first()
 
-            if not existing_cart_item:
-                # Add the book to the cart
-                new_cart_item = CartItem(user_id=current_user.id, book_id=book.id)
-                db.session.add(new_cart_item)
-                db.session.commit()
-                print("Book added to cart")
-            else:
-                print("The book is already in the user's cart")
+        if not book:
+            # If the book does not exist, create a new one
+            book = Book(
+                google_id=book_id,
+                title=title,
+                authors=authors,
+                description=description,
+                image=image,
+            )
+            db.session.add(book)
+            db.session.commit()
+            print("New book added to database:", book)
+        # Check if the book is already in the user's cart
+        existing_cart_item = CartItem.query.filter_by(
+            user_id=current_user.id, book_id=book.id
+        ).first()
+
+        if not existing_cart_item:
+            # If the book is not in the cart, add it
+            new_cart_item = CartItem(user_id=current_user.id, book_id=book.id)
+            db.session.add(new_cart_item)
+            db.session.commit()
+            flash("Book added to cart.", "success")
+            print("Book added to cart")
         else:
-            print("Book not found")
+            flash("The book is already in your cart.", "info")
+            print("The book is already in the user's cart")
 
     except requests.exceptions.RequestException as e:
+        flash(f"HTTP Request failed: {e}", "error")
         print(f"HTTP Request failed: {e}")
     except Exception as e:
+        flash(f"An unexpected error occurred: {e}", "error")
         print(f"An unexpected error occurred: {e}")
 
     return redirect(url_for("cart"))
@@ -195,6 +197,16 @@ def checkout():
     # Render the checkout page for GET request
     return render_template("checkout.html")
 
+@home.route("/remove_book/<book_id>", methods=["GET", "POST"])
+@login_required
+def remove_book(book_id):
+    book = CartItem.query.filter_by(book_id=book_id).first()
+    
+    print(book)
+    db.session.delete(book)
+    db.session.commit()
+    flash("Book Removed", "success")
+    return redirect(url_for("cart"))
 
 @home.route("/profile")
 @login_required

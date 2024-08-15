@@ -103,8 +103,21 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
     color: aliceblue !important;
     background-color: #0000006c !important;
   }
-</style>
 
+  .remove-btn {
+    background-color: #f44336; /* Red background */
+    color: white; /* White text */
+    border: none; /* Remove borders */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 20px; /* Some padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition */
+  }
+  .remove-btn:hover {
+    background-color: #d32f2f; /* Darker red on hover */
+  }
+</style>
 
 <div class="cart-container">
   <div class="cart-header">
@@ -125,6 +138,10 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
         <p class="book-authors">By {{ book.authors }}</p>
         {{ book.description | truncate(150) | safe }}
       </div>
+
+      <button class="remove-btn">
+        <a href="{{ url_for('main.remove_book', book_id=book.id) }}">remove</a>
+      </button>
     </div>
     {% endfor %} {% else %}
     <div class="empty-cart">

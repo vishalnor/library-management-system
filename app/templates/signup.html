@@ -28,20 +28,58 @@
         padding: 0;
         background: #4e54c8;
         background: -webkit-linear-gradient(to left, #8f94fb, #4e54c8);
-        min-height: 100%;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
-        overflow: hidden;
+        align-items: center;
+        overflow-y: auto;
         z-index: -99;
         background-size: cover;
+        padding: 20px 0;
+      }
+
+      .alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        max-width: 300px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 500;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .alert-success {
+        background: #28a745 !important; /* Bootstrap's Success Green */
+      }
+      .alert-danger {
+        background: #dc3545 !important; /* Bootstrap's Danger Red */
       }
 
       .container {
         background-color: #ffffff;
         border-radius: 10px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        width: 500px;
-        padding: 40px;
+        width: 90%;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px 40px;
       }
 
       .logo {
@@ -139,46 +177,6 @@
       .btn-google img {
         width: 20px;
         height: 20px;
-      }
-
-      .alert {
-        padding: 15px;
-        background-color: #f44336;
-        color: white;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        position: absolute;
-        top: 0;
-        right: 0;
-        animation: slideDown 0.5s ease-out;
-      }
-
-      @keyframes slideDown {
-        from {
-          transform: translateY(-20px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-      .alert {
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 20px;
-        text-align: center;
-        font-weight: 500;
-      }
-
-      .alert-success {
-        background-color: var(--success-color);
-        color: #ffffff;
-      }
-
-      .alert-danger {
-        background-color: var(--error-color);
-        color: #ffffff;
       }
 
       .toggle-form {
@@ -477,20 +475,22 @@
         box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
       }
 
-      /* Styles for screens that are 600px wide or less */
       @media only screen and (max-width: 600px) {
         .container {
-          margin: 0px 30px;
+          width: calc(100% - 40px);
+          margin: 20px;
+          padding: 35px;
         }
       }
     </style>
   </head>
   <body>
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, message in messages %}
-    <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
     <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="alert alert-{{ category }} flash-message">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+
       <div class="logo">
         <i class="fas fa-book-reader"></i>
       </div>
@@ -530,7 +530,11 @@
               />
               {% endfor %}
             </div>
-            <button type="button" onclick="confirmAvatarSelection()" class="confirm-btn">
+            <button
+              type="button"
+              onclick="confirmAvatarSelection()"
+              class="confirm-btn"
+            >
               <i class="fas fa-check"></i> Confirm Selection
             </button>
           </div>
@@ -564,6 +568,7 @@
   </body>
 </html>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const flashMessages = document.querySelectorAll(".alert");
@@ -605,4 +610,10 @@
       alert("Please select an avatar before confirming.");
     }
   }
+
+  $(document).ready(function () {
+    setTimeout(function () {
+      $(".flash-message").slideUp(500); // Slide up in 500ms
+    }, 3000); // Display for 3 seconds before sliding up
+  });
 </script>

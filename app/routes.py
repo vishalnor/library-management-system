@@ -20,15 +20,30 @@ from flask_login import (
 )
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from app import app, db, logger, mail
 from app.models import User, Book, CartItem, Checkout
 from app.controller import signin_controller
 from app.controller import signup_controller
 from app.controller import send_email
 from app import login_manager
+import cloudinary
+import cloudinary.uploader
+
+
 
 home = Blueprint("main", __name__)
+
 login_manager.login_view = "main.signin"
+# Define the directory where uploaded files will be saved
+app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+# Define allowed file extensions
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("CLOUD_API_KEY"),
+    api_secret=os.getenv("CLOUD_SECRET_KEY"))
 
 
 # Routes
@@ -49,23 +64,23 @@ def signin():
 
 @home.route("/signup", methods=["GET", "POST"])
 def signup():
-    
+
     urls = [
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Molly",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=George",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Bubba",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Sassy",
         "https://api.dicebear.com/9.x/adventurer/svg?seed=Mittens",
-        "https://api.dicebear.com/9.x/adventurer/svg?seed=Callie"
-        ]
-    
+        "https://api.dicebear.com/9.x/adventurer/svg?seed=Callie",
+    ]
+
     print("URLS", urls)
     if request.method == "POST":
         username = request.form.get("name")
         email = request.form.get("email")
         password = request.form.get("password")
         avatar_url = request.form.get("avatar_url")
-        
+
         signup_controller(username, email, password, avatar_url)
 
     return render_template("signup.html", urls=urls)
@@ -82,6 +97,7 @@ def search():
         )
         books = response.json().get("items", [])
     return render_template("search.html", books=books)
+
 
 @app.route("/add_to_cart/<book_id>", methods=["POST", "GET"])
 @login_required
@@ -197,29 +213,56 @@ def checkout():
     # Render the checkout page for GET request
     return render_template("checkout.html")
 
+
 @home.route("/remove_book/<book_id>", methods=["GET", "POST"])
 @login_required
 def remove_book(book_id):
     book = CartItem.query.filter_by(book_id=book_id).first()
-    
+
     print(book)
     db.session.delete(book)
     db.session.commit()
     flash("Book Removed", "success")
     return redirect(url_for("cart"))
 
-@home.route("/profile")
+
+
+@home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
-    book_list = []
-    print(book_list)
-    count = len(cart_items)
-    print(count)
-    for books in cart_items:
-        book = Book.query.filter_by(id=books.book_id).first()
-        book_list.append(book)
-    return render_template("profile.html", user=current_user, items=book_list)
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        file = request.files.get("avatar-input")
+        upload_result = cloudinary.uploader.upload(file)
+        url = upload_result.get('url')
+
+
+        # Debugging: Print the form data to ensure it’s being captured
+        print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
+
+        user = User.query.filter_by(id=current_user.id).first()
+
+        if user:
+            # Update user details
+            user.username = name
+            user.email = email
+
+            if password:
+                user.password_hash = generate_password_hash(password)
+
+            if file:
+                user.avatar = url
+
+            db.session.commit()  # Save the changes to the database
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("User not found!", "danger")
+
+        return redirect(url_for("main.profile"))
+
+    return render_template("profile.html", user=current_user)
 
 
 @home.route("/", methods=["GET", "POST"])

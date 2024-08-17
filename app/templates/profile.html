@@ -10,36 +10,26 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
     --border-color: #e0e0e0;
   }
 
-  /* body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--background-color);
-        color: var(--text-color);
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      } */
-
   .container-2 {
     background-color: var(--card-background);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 40px;
-    width: 400px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    margin: 2rem auto;
   }
 
   .profile-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
   }
 
   .avatar-container {
     position: relative;
     width: 120px;
     height: 120px;
-    margin: 0 auto 20px;
+    margin: 0 auto 1.5rem;
   }
 
   .avatar {
@@ -48,6 +38,11 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--primary-color);
+    transition: transform 0.3s ease;
+  }
+
+  .avatar:hover {
+    transform: scale(1.05);
   }
 
   .avatar-update {
@@ -65,39 +60,47 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
     align-items: center;
     cursor: pointer;
     font-size: 18px;
+    transition: background-color 0.3s ease;
+  }
+
+  .avatar-update:hover {
+    background-color: #414485;
   }
 
   h1 {
-    font-size: 24px;
-    margin-bottom: 5px;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
   }
 
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
   }
 
   label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.9rem;
+    color: var(--text-color);
   }
 
   input[type="text"],
   input[type="email"],
   input[type="password"] {
     width: 100%;
-    padding: 10px;
+    padding: 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
+    font-size: 1rem;
+    transition: all 0.3s ease;
   }
 
   input[type="text"]:focus,
   input[type="email"]:focus,
   input[type="password"]:focus {
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.1);
     outline: none;
   }
 
@@ -106,48 +109,104 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 12px 20px;
-    font-size: 16px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
   }
 
   .update-btn:hover {
     background-color: #414485;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(78, 84, 200, 0.2);
   }
 
   #avatar-input {
     display: none;
   }
+
+  @media (max-width: 480px) {
+    .container-2 {
+      padding: 1.5rem;
+    }
+
+    .avatar-container {
+      width: 100px;
+      height: 100px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      font-size: 0.9rem;
+    }
+
+    .update-btn {
+      font-size: 0.9rem;
+    }
+  }
 </style>
+
 <div class="container-2">
   <div class="profile-header">
     <div class="avatar-container">
       <img
-        src="https://via.placeholder.com/150"
+        src="{{user.avatar}}"
         alt="Avatar"
         class="avatar"
         id="avatar-preview"
       />
       <label for="avatar-input" class="avatar-update">+</label>
-      <input type="file" id="avatar-input" accept="image/*" />
     </div>
     <h1>Update Profile</h1>
   </div>
-  <form id="update-form">
+  <form
+    id="update-form"
+    action="/profile"
+    method="POST"
+    enctype="multipart/form-data"
+  >
     <div class="form-group">
       <label for="name">Name</label>
-      <input type="text" id="name" name="name" required />
+      <input
+        type="text"
+        id="name"
+        name="name"
+        value="{{user.username}}"
+        required
+      />
     </div>
     <div class="form-group">
       <label for="email">Email</label>
-      <input type="email" id="email" name="email" required />
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value="{{user.email}}"
+        required
+      />
     </div>
     <div class="form-group">
       <label for="password">New Password</label>
-      <input type="password" id="password" name="password" />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        value="{{user.password_hash}}"
+      />
     </div>
+    <input
+      type="file"
+      id="avatar-input"
+      hidden
+      name="avatar-input"
+      accept="image/*"
+    />
     <button type="submit" class="update-btn">Update Profile</button>
   </form>
 </div>
@@ -165,13 +224,6 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
         reader.readAsDataURL(file);
       }
     });
-
-  document
-    .getElementById("update-form")
-    .addEventListener("submit", function (event) {
-      event.preventDefault();
-      // Handle form submission here
-      console.log("Form submitted");
-    });
 </script>
+
 {% endblock %}

@@ -1,12 +1,26 @@
 {% extends "base.html" %} {% block title %}Your Cart - Norens Library System{%
-endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
+endblock %} {% block head %}
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+/>
+{{ super() }} {% endblock %} {% block content %}
 <style>
   body {
     font-family: "Open Sans", sans-serif;
     background-color: #f4f4f4;
-    color: #fafafa;
+    color: #000000;
   }
 
+  [data-theme="dark"] .cart-content {
+    background-color: rgba(0, 0, 0, 0.71) !important;
+    color: white !important;
+  }
+
+  [data-theme="dark"] .cart-header {
+    background-color: #1f1f1f !important;
+    color: white !important;
+  }
   .cart-container {
     max-width: 1000px;
     margin: 40px auto;
@@ -105,17 +119,24 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
   }
 
   .remove-btn {
-    background-color: #f44336; /* Red background */
-    color: white; /* White text */
-    border: none; /* Remove borders */
-    border-radius: 5px; /* Rounded corners */
-    padding: 10px 20px; /* Some padding */
-    font-size: 16px; /* Font size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s; /* Smooth transition */
+    background-color: transparent; /* No background color */
+    border: none; /* Remove default button border */
+    cursor: pointer; /* Change cursor to pointer */
+    padding: 10px; /* Adjust padding */
   }
-  .remove-btn:hover {
-    background-color: #d32f2f; /* Darker red on hover */
+
+  .remove-btn a {
+    color: #e74c3c; /* Red color for the icon */
+    font-size: 20px; /* Adjust size of the icon */
+    text-decoration: none; /* Remove underline from link */
+  }
+
+  .remove-btn a:hover {
+    color: #c0392b; /* Darker red on hover */
+  }
+
+  .remove-btn i {
+    transition: color 0.3s; /* Smooth color transition */
   }
 </style>
 
@@ -140,7 +161,10 @@ endblock %} {% block head %} {{ super() }} {% endblock %} {% block content %}
       </div>
 
       <button class="remove-btn">
-        <a href="{{ url_for('main.remove_book', book_id=book.id) }}">remove</a>
+        <a href="{{ url_for('main.remove_book', book_id=book.id) }}">
+          <i class="fas fa-trash-alt"></i>
+          <!-- Font Awesome trash can icon -->
+        </a>
       </button>
     </div>
     {% endfor %} {% else %}

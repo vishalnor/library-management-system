@@ -31,19 +31,19 @@ import cloudinary
 import cloudinary.uploader
 
 
-
 home = Blueprint("main", __name__)
 
 login_manager.login_view = "main.signin"
 # Define the directory where uploaded files will be saved
-app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+app.config["UPLOAD_FOLDER"] = "static/uploads/"
 # Define allowed file extensions
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
     api_key=os.getenv("CLOUD_API_KEY"),
-    api_secret=os.getenv("CLOUD_SECRET_KEY"))
+    api_secret=os.getenv("CLOUD_SECRET_KEY"),
+)
 
 
 # Routes
@@ -132,6 +132,9 @@ def add_to_cart(book_id):
             db.session.add(book)
             db.session.commit()
             print("New book added to database:", book)
+        else:
+            print("Book already exists in the database:", book)
+
         # Check if the book is already in the user's cart
         existing_cart_item = CartItem.query.filter_by(
             user_id=current_user.id, book_id=book.id
@@ -226,7 +229,6 @@ def remove_book(book_id):
     return redirect(url_for("cart"))
 
 
-
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
@@ -236,8 +238,7 @@ def profile():
         password = request.form.get("password")
         file = request.files.get("avatar-input")
         upload_result = cloudinary.uploader.upload(file)
-        url = upload_result.get('url')
-
+        url = upload_result.get("url")
 
         # Debugging: Print the form data to ensure it’s being captured
         print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")

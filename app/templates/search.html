@@ -11,6 +11,22 @@ content %}
     padding: 0;
   }
 
+  [data-theme="dark"] .search-results,
+  .search-input {
+    background-color: rgba(0, 0, 0, 0.71) !important;
+    color: white !important;
+  }
+
+  [data-theme="dark"] .search-header h1 {
+    color: white !important;
+  }
+
+  [data-theme="dark"] .book-card {
+    background-color: rgb(23, 23, 23) !important;
+    border: 1px solid rgb(0, 0, 0);
+    color: white !important;
+  }
+
   .search-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -153,8 +169,8 @@ content %}
   }
 
   a {
-    text-decoration: none!important;
-    color: white!important;
+    text-decoration: none !important;
+    color: white !important;
   }
 </style>
 
@@ -215,6 +231,11 @@ content %}
     {% endif %}
   </div>
 
-  <a href="/cart" style="text-decoration: none; color: white!important;" class="back-to-cart">Back to Cart</a>
+  <a
+    href="/cart"
+    style="text-decoration: none; color: white !important"
+    class="back-to-cart"
+    >Back to Cart</a
+  >
 </div>
 {% endblock %}

@@ -220,6 +220,7 @@ content %}
             href="{{ url_for('add_to_cart', book_id=book.id) }}"
             class="add-to-cart"
             target="_blank"
+            id="myLink"
             >Add to Cart</a
           >
         </div>
@@ -238,4 +239,17 @@ content %}
     >Back to Cart</a
   >
 </div>
+<script>
+  let isClicked = false;
+
+  document.getElementById("myLink").addEventListener("click", function (event) {
+    if (isClicked) {
+      // Prevent opening a new tab on subsequent clicks
+      event.preventDefault();
+      window.open(this.href, "_blank").focus(); // Refreshes in the same tab
+    } else {
+      isClicked = true;
+    }
+  });
+</script>
 {% endblock %}

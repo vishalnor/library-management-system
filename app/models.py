@@ -25,8 +25,8 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.String(200), unique=True)
     google_id = db.Column(db.String(200), unique=True)
-    title = db.Column(db.String(200), nullable=False)
-    authors = db.Column(db.String(200))
+    title = db.Column(db.String(500), nullable=False)
+    authors = db.Column(db.String(200), unique=False)
     description = db.Column(db.Text)
 
 

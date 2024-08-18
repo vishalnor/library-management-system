@@ -9,6 +9,21 @@ System{% endblock %} {% block head %} {{ super() }}
     margin: 0 auto;
     padding: 20px;
   }
+
+  [data-theme="dark"] form {
+    background-color: rgba(0, 0, 0, 0.71) !important;
+    color: white !important;
+  }
+
+  [data-theme="dark"] input {
+    background-color: rgba(0, 0, 0, 0.71) !important;
+    color: white !important;
+  }
+
+  [data-theme="dark"] h1 {
+    color: white !important;
+  }
+
   h1 {
     color: #2c3e50;
     border-bottom: 2px solid #4e54c8;
@@ -35,7 +50,7 @@ System{% endblock %} {% block head %} {{ super() }}
     border-radius: 3px;
   }
   input[type="submit"] {
-    background-color: #4e54c8;
+    background-color: #4e54c8 !important;
     color: white;
     border: none;
     cursor: pointer;
@@ -113,9 +128,6 @@ System{% endblock %} {% block head %} {{ super() }}
       opacity: 1;
     }
   }
-
-
-
 
   .mt-4 {
     margin-top: 6.5rem !important;

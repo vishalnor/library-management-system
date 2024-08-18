@@ -245,6 +245,11 @@ def profile():
 
             if file:
                 user.avatar = url
+                try:
+                    result = cloudinary.uploader.upload(file)
+                    print(result)
+                except Exception as e:
+                    print(f"Cloudinary error: {e}")
 
             db.session.commit()  # Save the changes to the database
             flash("Profile updated successfully!", "success")

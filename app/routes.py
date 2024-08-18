@@ -27,23 +27,13 @@ from app.controller import signin_controller
 from app.controller import signup_controller
 from app.controller import send_email
 from app import login_manager
-import cloudinary
-import cloudinary.uploader
-
+from app import cloudinary
 
 home = Blueprint("main", __name__)
 
 login_manager.login_view = "main.signin"
 # Define the directory where uploaded files will be saved
-app.config["UPLOAD_FOLDER"] = "static/uploads/"
-# Define allowed file extensions
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("CLOUD_API_KEY"),
-    api_secret=os.getenv("CLOUD_SECRET_KEY"),
-)
 
 
 # Routes

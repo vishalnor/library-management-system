@@ -261,8 +261,6 @@ def profile():
     except Exception as e:
         # Log the error
         app.logger.error(f"Error in /profile route: {e}")
-        # Show a friendly error message
-        return render_template('error.html'), 500
 
     return render_template("profile.html", user=current_user)
 

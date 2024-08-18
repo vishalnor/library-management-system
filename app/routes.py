@@ -222,41 +222,47 @@ def remove_book(book_id):
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        file = request.files.get("avatar-input")
-        upload_result = cloudinary.uploader.upload(file)
-        url = upload_result.get("url")
+    try:
+        if request.method == "POST":
+            name = request.form.get("name")
+            email = request.form.get("email")
+            password = request.form.get("password")
+            file = request.files.get("avatar-input")
+            upload_result = cloudinary.uploader.upload(file)
+            url = upload_result.get("url")
 
-        # Debugging: Print the form data to ensure it’s being captured
-        print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
+            # Debugging: Print the form data to ensure it’s being captured
+            print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
 
-        user = User.query.filter_by(id=current_user.id).first()
+            user = User.query.filter_by(id=current_user.id).first()
 
-        if user:
-            # Update user details
-            user.username = name
-            user.email = email
+            if user:
+                # Update user details
+                user.username = name
+                user.email = email
 
-            if password:
-                user.password_hash = generate_password_hash(password)
+                if password:
+                    user.password_hash = generate_password_hash(password)
 
-            if file:
-                user.avatar = url
-                try:
-                    result = cloudinary.uploader.upload(file)
-                    print(result)
-                except Exception as e:
-                    print(f"Cloudinary error: {e}")
+                if file:
+                    user.avatar = url
+                    try:
+                        result = cloudinary.uploader.upload(file)
+                        print(result)
+                    except Exception as e:
+                        print(f"Cloudinary error: {e}")
 
-            db.session.commit()  # Save the changes to the database
-            flash("Profile updated successfully!", "success")
-        else:
-            flash("User not found!", "danger")
+                db.session.commit()  # Save the changes to the database
+                flash("Profile updated successfully!", "success")
+            else:
+                flash("User not found!", "danger")
 
         return redirect(url_for("main.profile"))
+    except Exception as e:
+        # Log the error
+        app.logger.error(f"Error in /profile route: {e}")
+        # Show a friendly error message
+        return render_template('error.html'), 500
 
     return render_template("profile.html", user=current_user)
 

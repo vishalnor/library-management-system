@@ -222,7 +222,7 @@ def remove_book(book_id):
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    try:
+        
         if request.method == "POST":
             name = request.form.get("name")
             email = request.form.get("email")
@@ -257,12 +257,10 @@ def profile():
             else:
                 flash("User not found!", "danger")
 
-        return redirect(url_for("main.profile"))
-    except Exception as e:
-        # Log the error
-        app.logger.error(f"Error in /profile route: {e}")
+            return redirect(url_for("main.profile"))
+    
 
-    return render_template("profile.html", user=current_user)
+        return render_template("profile.html", user=current_user)
 
 
 @home.route("/", methods=["GET", "POST"])

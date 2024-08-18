@@ -219,7 +219,6 @@ content %}
           <a
             href="{{ url_for('add_to_cart', book_id=book.id) }}"
             class="add-to-cart"
-            target="_blank"
             id="myLink"
             >Add to Cart</a
           >
@@ -246,9 +245,11 @@ content %}
     if (isClicked) {
       // Prevent opening a new tab on subsequent clicks
       event.preventDefault();
-      window.open(this.href, "_blank").focus(); // Refreshes in the same tab
     } else {
-      isClicked = true;
+      // Open in new tab on first click
+      window.open(this.href, "_blank").focus();
+      isClicked = true; // Set flag to true after first click
+      event.preventDefault(); // Prevent default anchor behavior after first click
     }
   });
 </script>

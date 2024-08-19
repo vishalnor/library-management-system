@@ -27,23 +27,13 @@ from app.controller import signin_controller
 from app.controller import signup_controller
 from app.controller import send_email
 from app import login_manager
-import cloudinary
-import cloudinary.uploader
-
+from app import cloudinary
 
 home = Blueprint("main", __name__)
 
 login_manager.login_view = "main.signin"
 # Define the directory where uploaded files will be saved
-app.config["UPLOAD_FOLDER"] = "static/uploads/"
-# Define allowed file extensions
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("CLOUD_API_KEY"),
-    api_secret=os.getenv("CLOUD_SECRET_KEY"),
-)
 
 
 # Routes
@@ -232,38 +222,45 @@ def remove_book(book_id):
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        file = request.files.get("avatar-input")
-        upload_result = cloudinary.uploader.upload(file)
-        url = upload_result.get("url")
+        
+        if request.method == "POST":
+            name = request.form.get("name")
+            email = request.form.get("email")
+            password = request.form.get("password")
+            file = request.files.get("avatar-input")
+            upload_result = cloudinary.uploader.upload(file)
+            url = upload_result.get("url")
 
-        # Debugging: Print the form data to ensure it’s being captured
-        print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
+            # Debugging: Print the form data to ensure it’s being captured
+            print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
 
-        user = User.query.filter_by(id=current_user.id).first()
+            user = User.query.filter_by(id=current_user.id).first()
 
-        if user:
-            # Update user details
-            user.username = name
-            user.email = email
+            if user:
+                # Update user details
+                user.username = name
+                user.email = email
 
-            if password:
-                user.password_hash = generate_password_hash(password)
+                if password:
+                    user.password_hash = generate_password_hash(password)
 
-            if file:
-                user.avatar = url
+                if file:
+                    user.avatar = url
+                    try:
+                        result = cloudinary.uploader.upload(file)
+                        print(result)
+                    except Exception as e:
+                        print(f"Cloudinary error: {e}")
 
-            db.session.commit()  # Save the changes to the database
-            flash("Profile updated successfully!", "success")
-        else:
-            flash("User not found!", "danger")
+                db.session.commit()  # Save the changes to the database
+                flash("Profile updated successfully!", "success")
+            else:
+                flash("User not found!", "danger")
 
-        return redirect(url_for("main.profile"))
+            return redirect(url_for("main.profile"))
+    
 
-    return render_template("profile.html", user=current_user)
+        return render_template("profile.html", user=current_user)
 
 
 @home.route("/", methods=["GET", "POST"])

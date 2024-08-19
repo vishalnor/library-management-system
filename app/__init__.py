@@ -7,6 +7,9 @@ import logging
 import os
 from flask_mail import Mail, Message
 
+import cloudinary
+import cloudinary.uploader
+
 # from flask_oauthlib.client import OAuth
 # Create and configure logger
 logging.basicConfig(filename="app.log", format="%(asctime)s %(message)s", filemode="w")
@@ -59,6 +62,16 @@ app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
 app.config["DEBUG"] = True
 app.config["ENV"] = "development"
 
+app.config["UPLOAD_FOLDER"] = "static/uploads/"
+# Define allowed file extensions
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("CLOUD_API_KEY"),
+    api_secret=os.getenv("CLOUD_SECRET_KEY"),
+    cloudinary_url=os.getenv("CLOUD_URL")
+)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

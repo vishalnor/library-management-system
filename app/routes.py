@@ -11,6 +11,7 @@ from flask import (
     session,
     jsonify,
 )
+import time
 import requests
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -33,7 +34,6 @@ home = Blueprint("main", __name__)
 
 login_manager.login_view = "main.signin"
 # Define the directory where uploaded files will be saved
-
 
 
 # Routes
@@ -222,45 +222,47 @@ def remove_book(book_id):
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-        
-        if request.method == "POST":
-            name = request.form.get("name")
-            email = request.form.get("email")
-            password = request.form.get("password")
-            file = request.files.get("avatar-input")
-            upload_result = cloudinary.uploader.upload(file)
-            url = upload_result.get("url")
 
-            # Debugging: Print the form data to ensure it’s being captured
-            print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        file = request.files.get("avatar-input")
+        upload_result = cloudinary.uploader.upload(
+            file, timestamp=int(time.time())  # Generates the current timestamp
+        )
 
-            user = User.query.filter_by(id=current_user.id).first()
+        url = upload_result.get("url")
 
-            if user:
-                # Update user details
-                user.username = name
-                user.email = email
+        # Debugging: Print the form data to ensure it’s being captured
+        print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
 
-                if password:
-                    user.password_hash = generate_password_hash(password)
+        user = User.query.filter_by(id=current_user.id).first()
 
-                if file:
-                    user.avatar = url
-                    try:
-                        result = cloudinary.uploader.upload(file)
-                        print(result)
-                    except Exception as e:
-                        print(f"Cloudinary error: {e}")
+        if user:
+            # Update user details
+            user.username = name
+            user.email = email
 
-                db.session.commit()  # Save the changes to the database
-                flash("Profile updated successfully!", "success")
-            else:
-                flash("User not found!", "danger")
+            if password:
+                user.password_hash = generate_password_hash(password)
 
-            return redirect(url_for("main.profile"))
-    
+            if file:
+                user.avatar = url
+                try:
+                    result = cloudinary.uploader.upload(file)
+                    print(result)
+                except Exception as e:
+                    print(f"Cloudinary error: {e}")
 
-        return render_template("profile.html", user=current_user)
+            db.session.commit()  # Save the changes to the database
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("User not found!", "danger")
+
+        return redirect(url_for("main.profile"))
+
+    return render_template("profile.html", user=current_user)
 
 
 @home.route("/", methods=["GET", "POST"])

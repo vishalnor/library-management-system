@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 import logging
 import os
 from flask_mail import Mail, Message
+
 # from flask_oauthlib.client import OAuth
 # Create and configure logger
 logging.basicConfig(filename="app.log", format="%(asctime)s %(message)s", filemode="w")
@@ -55,6 +56,8 @@ app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
 #     access_token_url='https://accounts.google.com/o/oauth2/token',
 #     authorize_url='https://accounts.google.com/o/oauth2/auth',
 # )
+app.config["DEBUG"] = True
+app.config["ENV"] = "development"
 
 
 db = SQLAlchemy(app)

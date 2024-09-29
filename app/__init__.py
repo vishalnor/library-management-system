@@ -70,7 +70,8 @@ cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
     api_key=os.getenv("CLOUD_API_KEY"),
     api_secret=os.getenv("CLOUD_SECRET_KEY"),
-    cloudinary_url=os.getenv("CLOUD_URL")
+    cloudinary_url=os.getenv("CLOUD_URL"),
+    signature_algorithm="sha256"
 )
 
 db = SQLAlchemy(app)

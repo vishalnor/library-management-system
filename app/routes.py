@@ -72,11 +72,11 @@ def signup():
         password = request.form.get("password")
         avatar_url = request.form.get("avatar_url")
         if avatar_url == "":
-            flash("Please select your avatar", 'danger')
+            flash("Please select your avatar", "danger")
             return redirect("/signup")
         else:
-           signup_controller(username, email, password, avatar_url)
-        #    return redirect("/signin")
+            signup_controller(username, email, password, avatar_url)
+            return redirect("/signin")
 
     return render_template("signup.html", urls=urls)
 
@@ -256,7 +256,7 @@ def profile():
         email = request.form.get("email")
         password = request.form.get("password")
         file = request.files.get("avatar-input")  # Get the uploaded file, if any
-
+        cloudinarytime=int(time.time())
         # Debugging: Print values to confirm they are being captured correctly
         print(f"Name: {name}, Email: {email}, Password: {password}, File: {file}")
 
@@ -267,7 +267,11 @@ def profile():
         if file:
             try:
                 upload_result = cloudinary.uploader.upload(
-                    file, timestamp=int(time.time())  # Generates the current timestamp
+                    file,
+                    use_filename=True,
+                    unique_filename=False,
+                    overwrite=True,
+                    timestamp=cloudinarytime,  # Generates the current timestamp
                 )
                 url = upload_result.get("url")
             except Exception as e:

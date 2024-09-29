@@ -40,7 +40,6 @@ def signup_controller(username, email, password, avatar_url):
         db.session.commit()
     
     flash("Account created successfully. Please log in.", "success")
-    return redirect("/signin")
     
 
 

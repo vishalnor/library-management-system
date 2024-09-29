@@ -11,6 +11,8 @@ from flask import (
     session,
     jsonify,
 )
+import time
+import random
 import requests
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -33,7 +35,6 @@ home = Blueprint("main", __name__)
 
 login_manager.login_view = "main.signin"
 # Define the directory where uploaded files will be saved
-
 
 
 # Routes
@@ -83,13 +84,30 @@ def signup():
 @home.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
+    search_term = request.form.get("search_term", None)
     books = []
-    if request.method == "POST":
-        search_term = request.form["search_term"]
+    if search_term == None:
+        # Choose a random predefined popular query to show a diverse range of books
+        popular_queries = [
+            "subject:fiction",
+            "subject:non-fiction",
+            "subject:business",
+            "subject:technology",
+            "subject:self-help",
+        ]
+        # Randomly pick one category to display books from
+        search_term_default = random.choice(popular_queries)
+        print(search_term_default)
+        response = requests.get(
+            f"https://www.googleapis.com/books/v1/volumes?q={search_term_default}&key={os.getenv('GOOGLE_BOOKS_API_KEY')}"
+        )
+        books = response.json().get("items", [])
+    else:
         response = requests.get(
             f"https://www.googleapis.com/books/v1/volumes?q={search_term}&key={os.getenv('GOOGLE_BOOKS_API_KEY')}"
         )
         books = response.json().get("items", [])
+
     return render_template("search.html", books=books)
 
 
@@ -113,8 +131,11 @@ def add_to_cart(book_id):
 
         # Check if the book already exists in the database
         book = Book.query.filter_by(google_id=book_id).first()
+        print(book)
 
-        if not book:
+        if book:
+            print("Book already exists in the database:", book)
+        else:
             # If the book does not exist, create a new one
             book = Book(
                 google_id=book_id,
@@ -126,8 +147,6 @@ def add_to_cart(book_id):
             db.session.add(book)
             db.session.commit()
             print("New book added to database:", book)
-        else:
-            print("Book already exists in the database:", book)
 
         # Check if the book is already in the user's cart
         existing_cart_item = CartItem.query.filter_by(
@@ -202,9 +221,14 @@ def checkout():
             )
 
         # Send email with the book links
-        send_email(student_name, email, book_links)
-        # Flash a success message and redirect
-        flash("Checkout completed and email sent successfully!", "success")
+        email_sent = send_email(student_name, email, book_links)
+        if email_sent:
+            flash("Checkout completed and email sent successfully!", "success")
+        else:
+            flash(
+                "Checkout completed, but there was an issue sending the email. Please contact support.",
+                "warning",
+            )
         return redirect(url_for("main.checkout"))
 
     # Render the checkout page for GET request
@@ -226,45 +250,57 @@ def remove_book(book_id):
 @home.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-        
-        if request.method == "POST":
-            name = request.form.get("name")
-            email = request.form.get("email")
-            password = request.form.get("password")
-            file = request.files.get("avatar-input")
-            upload_result = cloudinary.uploader.upload(file)
-            url = upload_result.get("url")
+    if request.method == "POST":
+        # Get form fields
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        file = request.files.get("avatar-input")  # Get the uploaded file, if any
 
-            # Debugging: Print the form data to ensure it’s being captured
-            print(f"Name: {name}, Email: {email}, Password: {password}, File: {url}")
+        # Debugging: Print values to confirm they are being captured correctly
+        print(f"Name: {name}, Email: {email}, Password: {password}, File: {file}")
 
-            user = User.query.filter_by(id=current_user.id).first()
+        # Initialize variables
+        url = None
 
-            if user:
-                # Update user details
+        # Only upload to Cloudinary if a file is provided
+        if file:
+            try:
+                upload_result = cloudinary.uploader.upload(
+                    file, timestamp=int(time.time())  # Generates the current timestamp
+                )
+                url = upload_result.get("url")
+            except Exception as e:
+                print(f"Cloudinary error: {e}")
+                flash("Failed to upload image. Please try again.", "danger")
+
+        # Find the user in the database
+        user = User.query.filter_by(id=current_user.id).first()
+
+        if user:
+            # Update user details
+            if name:
                 user.username = name
+
+            if email:
                 user.email = email
 
-                if password:
-                    user.password_hash = generate_password_hash(password)
+            if password:
+                user.password_hash = generate_password_hash(password)
 
-                if file:
-                    user.avatar = url
-                    try:
-                        result = cloudinary.uploader.upload(file)
-                        print(result)
-                    except Exception as e:
-                        print(f"Cloudinary error: {e}")
+            # Update avatar URL only if a new file was uploaded
+            if url:
+                user.avatar = url
 
-                db.session.commit()  # Save the changes to the database
-                flash("Profile updated successfully!", "success")
-            else:
-                flash("User not found!", "danger")
+            # Save the changes to the database
+            db.session.commit()
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("User not found!", "danger")
 
-            return redirect(url_for("main.profile"))
-    
+        return redirect(url_for("main.profile"))
 
-        return render_template("profile.html", user=current_user)
+    return render_template("profile.html", user=current_user)
 
 
 @home.route("/", methods=["GET", "POST"])

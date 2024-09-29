@@ -44,19 +44,26 @@ def signup_controller(username, email, password, avatar_url):
     
 
 
+import traceback
+
+
 def send_email(student_name, email, book_links):
     msg = Message(
         "Your E-Books Are Ready - Norens Library",
-        recipients=[email],  # Use the collected email address
+        recipients=[email],
     )
 
-    msg.body = "Thank you for the purchased please find below all the links"
+    msg.body = "Thank you for the purchase. Please find below all the links."
     msg.html = render_template(
         "email_template.html", student_name=student_name, links=book_links
     )
 
     try:
         mail.send(msg)
+        print(f"Email sent successfully to {email}")
         return True
     except Exception as e:
-        return f"Failed to send email: {e}"
+        print(f"Failed to send email to {email}: {str(e)}")
+        print("Traceback:")
+        traceback.print_exc()
+        return False

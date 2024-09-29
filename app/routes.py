@@ -256,9 +256,10 @@ def profile():
         email = request.form.get("email")
         password = request.form.get("password")
         file = request.files.get("avatar-input")  # Get the uploaded file, if any
-        cloudinarytime=int(time.time())
+        cloudinarytime = int(time.time())
         # Debugging: Print values to confirm they are being captured correctly
         print(f"Name: {name}, Email: {email}, Password: {password}, File: {file}")
+        print(f"Generated timestamp: {int(time.time())}")
 
         # Initialize variables
         url = None

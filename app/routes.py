@@ -70,8 +70,12 @@ def signup():
         email = request.form.get("email")
         password = request.form.get("password")
         avatar_url = request.form.get("avatar_url")
-
-        signup_controller(username, email, password, avatar_url)
+        if avatar_url == "":
+            flash("Please select your avatar", 'danger')
+            return redirect("/signup")
+        else:
+           signup_controller(username, email, password, avatar_url)
+        #    return redirect("/signin")
 
     return render_template("signup.html", urls=urls)
 

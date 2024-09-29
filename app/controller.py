@@ -38,9 +38,10 @@ def signup_controller(username, email, password, avatar_url):
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
-
+    
     flash("Account created successfully. Please log in.", "success")
     return redirect("/signin")
+    
 
 
 def send_email(student_name, email, book_links):
